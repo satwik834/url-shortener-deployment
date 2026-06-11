@@ -1,8 +1,7 @@
 services:
   backend:
-    build: ./backend
     container_name: url_backend
-    image: url-backend
+    image: saathwik834/url-backend:1.0
     ports:
       - "8000:8000"
     env_file:
@@ -26,7 +25,7 @@ services:
     container_name: url_redis
     restart: always
   frontend:
-    build: frontend\url-shortener-frontend
+    image: saathwik834/url-frontend:1.0
     ports:
       - "3000:80"
     depends_on:

@@ -1,0 +1,45 @@
+services:
+  backend:
+    build: ./backend
+    container_name: url_backend
+    image: url-backend
+    # We do NOT expose port 8000 to the public host in production.
+    # Nginx in the frontend container handles routing to it internally.
+    expose:
+      - "8000"
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY}
+      - ACCESS_TOKEN_EXPIRE=30
+    depends_on:
+      - postgres
+      - redis
+    restart: always
+
+  postgres:
+    image: postgres:15
+    container_name: url_postgres
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:7
+    container_name: url_redis
+    restart: always
+
+  frontend:
+    build: ./frontend/url-shortener-frontend
+    ports:
+      - "80:80"  # Expose port 80 to the public internet
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  postgres_data:
